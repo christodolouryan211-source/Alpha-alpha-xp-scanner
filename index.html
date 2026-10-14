@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Alpha XP AI Market Scanner</title>
+<style>
+:root{color-scheme:dark;--bg:#080d18;--panel:#111a2b;--line:#25334d;--text:#edf3ff;--muted:#9eacc7;--green:#4be0a2;--red:#ff7084;--gold:#ffc857;--blue:#70a7ff}
+*{box-sizing:border-box}body{margin:0;background:radial-gradient(ellipse at top,#14213c 0,#080d18 55%);font:15px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif;color:var(--text)}
+main{max-width:1180px;margin:auto;padding:22px}header{display:flex;justify-content:space-between;gap:15px;align-items:center;flex-wrap:wrap;margin-bottom:18px}
+.brand{display:flex;gap:12px;align-items:center}.logo{display:grid;place-items:center;width:48px;height:48px;border:1px solid #3d5a8d;border-radius:14px;background:linear-gradient(135deg,#1c3765,#10182a);font-weight:900;color:var(--blue);font-size:20px}.brand h1{font-size:22px;margin:0;letter-spacing:.4px}.brand p{margin:2px 0 0;color:var(--muted);font-size:12px}
+.pill{border:1px solid var(--line);border-radius:99px;padding:7px 11px;color:var(--muted);font-size:12px}.dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:#78849a;margin-right:6px}.dot.live{background:var(--green);box-shadow:0 0 10px #4be0a266}
+.notice{border:1px solid #66552c;background:#211b10;color:#ffe4a0;border-radius:12px;padding:11px 14px;font-size:12px;margin-bottom:16px}
+.grid{display:grid;grid-template-columns:1.1fr .9fr;gap:16px}.panel{background:linear-gradient(160deg,#121d30,#0e1625);border:1px solid var(--line);border-radius:16px;padding:17px;min-width:0}.panel h2{font-size:15px;margin:0 0 14px}.controls{display:grid;grid-template-columns:1fr 1fr;gap:10px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:5px}select,input,button{font:inherit;color:var(--text);background:#0a1220;border:1px solid #2a3b59;border-radius:9px;padding:10px;width:100%}button{cursor:pointer;font-weight:700;background:linear-gradient(100deg,#2855a1,#3978d5);border:0}button.secondary{background:#17243a;border:1px solid #2a3b59}.actions{display:flex;gap:9px;margin-top:12px}.actions>*{flex:1}
+.stats{display:grid;grid-template-columns:repeat(3,1fr);gap:9px;margin-top:15px}.stat{background:#0a1220;border:1px solid #1f2d44;border-radius:10px;padding:11px}.stat small{display:block;color:var(--muted);font-size:11px}.stat strong{display:block;font-size:17px;margin-top:3px;overflow-wrap:anywhere}
+.status{font-size:12px;color:var(--muted);margin-top:10px;min-height:18px}.scanlist{display:grid;gap:9px}.market{padding:12px;border:1px solid #22314a;border-radius:11px;background:#0b1423}.markethead{display:flex;justify-content:space-between;gap:8px;align-items:center}.marketname{font-weight:750}.price{font-variant-numeric:tabular-nums;color:#c9d8f5}.tag{font-size:11px;padding:3px 7px;border-radius:99px;background:#253249;color:#c4d0e4}.tag.buy{background:#103d32;color:#70f0bb}.tag.sell{background:#451e2a;color:#ff9ba9}.tag.wait{background:#3b321b;color:#ffdf83}.marketmeta{display:flex;gap:12px;flex-wrap:wrap;color:var(--muted);font-size:12px;margin-top:8px}
+.signalbox{margin-top:14px;border:1px solid #2b3d5d;border-radius:12px;padding:14px;background:#0a1220}.signalbox h3{font-size:13px;margin:0 0 10px;color:#b8c9e8}.signalgrid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}.signalgrid div{padding:9px;border-radius:8px;background:#111d30}.signalgrid small{display:block;color:var(--muted);font-size:11px}.signalgrid strong{font-size:14px;overflow-wrap:anywhere}
+table{width:100%;border-collapse:collapse;font-size:12px}th,td{text-align:left;padding:9px 6px;border-bottom:1px solid #22314a}th{color:var(--muted);font-weight:600}.empty{color:var(--muted);font-size:13px;padding:14px 0}
+footer{color:var(--muted);font-size:11px;margin:18px 2px 0}
+@media(max-width:800px){main{padding:13px}.grid{grid-template-columns:1fr}.brand h1{font-size:19px}.stats{grid-template-columns:repeat(3,1fr)}.stat strong{font-size:14px}}
+</style>
+</head>
+<body>
+<main>
+<header>
+ <div class="brand"><div class="logo">AX</div><div><h1>ALPHA XP <span style="color:#70a7ff">SCANNER</span></h1><p>Live market data · rule-based setup detection · risk levels</p></div></div>
+ <div class="pill"><span id="liveDot" class="dot"></span><span id="connection">Not connected</span></div>
+</header>
+<div class="notice"><b>Risk notice:</b> This is an experimental signal scanner, not a guaranteed-profit AI. An 85% win rate is not promised. Signals are for analysis/demo testing only; this page does not place trades.</div>
+<div class="grid">
+<section class="panel">
+ <h2>Scanner controls</h2>
+ <div class="controls">
+  <div class="field"><label for="symbol">Primary market</label><select id="symbol"><option value="R_25">Volatility 25 Index</option><option value="R_10">Volatility 10 Index</option><option value="R_50">Volatility 50 Index</option><option value="R_75">Volatility 75 Index</option><option value="R_100">Volatility 100 Index</option></select></div>
+  <div class="field"><label for="appId">Deriv app ID</label><input id="appId" value="1089" inputmode="numeric" aria-label="Deriv app ID"></div>
+  <div class="field"><label for="riskReward">Risk : reward target</label><select id="riskReward"><option value="2">1 : 2</option><option value="1.5">1 : 1.5</option><option value="3">1 : 3</option></select></div>
+  <div class="field"><label for="lookback">Tick lookback</label><select id="lookback"><option value="60">60 ticks</option><option value="100" selected>100 ticks</option><option value="150">150 ticks</option></select></div>
+ </div>
+ <div class="actions"><button id="connectBtn">Connect live data</button><button id="stopBtn" class="secondary">Disconnect</button></div>
+ <div id="status" class="status">Connect to request public market ticks. No trading token is needed for public data.</div>
+ <div class="stats">
+  <div class="stat"><small>Last price</small><strong id="lastPrice">—</strong></div>
+  <div class="stat"><small>Trend</small><strong id="trend">—</strong></div>
+  <div class="stat"><small>RSI (14)</small><strong id="rsi">—</strong></div>
+ </div>
+ <div class="signalbox">
+  <h3>Latest setup analysis</h3>
+  <div id="signalSummary" style="color:#c3d2eb;margin-bottom:12px">Waiting for market data…</div>
+  <div class="signalgrid">
+   <div><small>Potential entry</small><strong id="entry">—</strong></div>
+   <div><small>Stop loss</small><strong id="sl">—</strong></div>
+   <div><small>Take profit</small><strong id="tp">—</strong></div>
+   <div><small>Risk : reward</small><strong id="rr">—</strong></div>
+  </div>
+ </div>
+</section>
+<section class="panel">
+ <h2>Market watch</h2>
+ <div id="scanlist" class="scanlist"></div>
+ <h2 style="margin-top:19px">Recent signal log</h2>
+ <div style="overflow-x:auto"><table><thead><tr><th>Time</th><th>Market</th><th>Signal</th><th>Entry</th></tr></thead><tbody id="history"><tr><td colspan="4" class="empty">No signals yet.</td></tr></tbody></table></div>
+</section>
+</div>
+<footer>Alpha XP Scanner prototype · Uses public Deriv tick data via WebSocket. Signals use simple EMA trend + RSI + recent range rules; these are not machine-learning predictions. Test extensively on demo data before relying on any strategy.</footer>
+</main>
+<script>
+(() => {
+ const $ = id => document.getElementById(id);
+ const symbols = {R_10:"Volatility 10",R_25:"Volatility 25",R_50:"Volatility 50",R_75:"Volatility 75",R_100:"Volatility 100"};
+ let ws=null, connected=false, ticks={}, subscriptions={}, history=[], lastSignals={};
+ const fmt = n => Number.isFinite(n) ? n.toLocaleString(undefined,{minimumFractionDigits:2,maximumFractionDigits:5}) : "—";
+ function setStatus(s){$("status").textContent=s}
+ function connection(s,on=false){$("connection").textContent=s;$("liveDot").className="dot"+(on?" live":"")}
+ function send(obj){if(ws&&ws.readyState===WebSocket.OPEN)ws.send(JSON.stringify(obj))}
+ function connect(){
+  disconnect(false);
+  const appId=($("appId").value||"1089").trim();
+  if(!/^\d+$/.test(appId)){setStatus("Enter a numeric Deriv app ID.");return}
+  try{ws=new WebSocket("wss://ws.derivws.com/websockets/v3?app_id="+encodeURIComponent(appId))}
+  catch(e){setStatus("Could not start WebSocket: "+e.message);return}
+  connection("Connecting…");setStatus("Connecting to Deriv public market data…");
+  ws.onopen=()=>{connected=true;connection("Connected",true);setStatus("Connected. Subscribing to live ticks…");Object.keys(symbols).forEach(s=>send({ticks:s,subscribe:1}));};
+  ws.onmessage=ev=>{
+   let m;try{m=JSON.parse(ev.data)}catch{return}
+   if(m.error){setStatus("Data API error: "+m.error.message);return}
+   if(m.msg_type==="tick"&&m.tick){const t=m.tick;const sym=t.symbol; if(!ticks[sym])ticks[sym]=[];ticks[sym].push({quote:Number(t.quote),epoch:Number(t.epoch)});if(ticks[sym].length>250)ticks[sym].shift();renderMarket(sym);if(sym===$("symbol").value)renderPrimary(sym)}
+   if(m.msg_type==="tick"&&m.tick&&m.tick.symbol=== $("symbol").value) setStatus("Live ticks received. Signals are rule-based and need independent testing.");
+  };
+  ws.onerror=()=>{setStatus("Connection error. Check your internet connection or app ID.");connection("Connection error")};
+  ws.onclose=()=>{connected=false;connection("Disconnected");};
+ }
+ function disconnect(show=true){if(ws){try{ws.onclose=null;ws.close()}catch(e){}ws=null}connected=false;connection("Disconnected");if(show)setStatus("Disconnected from live data.");}
+ function ema(values,period){if(values.length<period)return null;let k=2/(period+1),v=values.slice(0,period).reduce((a,b)=>a+b,0)/period;for(let i=period;i<values.length;i++)v=values[i]*k+v*(1-k);return v}
+ function rsi(values,period=14){if(values.length<=period)return null;let gains=0,losses=0;for(let i=values.length-period;i<values.length;i++){let d=values[i]-values[i-1];if(d>0)gains+=d;else losses-=d}if(losses===0)return 100;return 100-(100/(1+(gains/period)/(losses/period)))}
+ function analyse(sym){
+  const all=(ticks[sym]||[]).map(x=>x.quote), n=Number($("lookback").value), v=all.slice(-n);
+  if(v.length<35)return {ready:false,count:v.length};
+  const fast=ema(v.slice(-Math.min(v.length,40)),8), slow=ema(v.slice(-Math.min(v.length,80)),21), rv=rsi(v,14);
+  const recent=v.slice(-20), range=Math.max(...recent)-Math.min(...recent);
+  const avgStep=recent.slice(1).reduce((a,x,i)=>a+Math.abs(x-recent[i]),0)/(recent.length-1);
+  let dir="WAIT",reason="No clear setup: wait for trend and momentum confirmation.";
+  if(fast>slow && rv>=52 && rv<=70){dir="BUY";reason="Bullish momentum: short EMA above long EMA and RSI confirms strength."}
+  else if(fast<slow && rv>=30 && rv<=48){dir="SELL";reason="Bearish momentum: short EMA below long EMA and RSI confirms weakness."}
+  const entry=v[v.length-1], distance=Math.max(range*.35,avgStep*5,entry*.0005);
+  const rr=Number($("riskReward").value);
+  let sl=null,tp=null;
+  if(dir==="BUY"){sl=entry-distance;tp=entry+distance*rr}
+  if(dir==="SELL"){sl=entry+distance;tp=entry-distance*rr}
+  return {ready:true,dir,reason,entry,sl,tp,rr,fast,slow,rsi:rv,count:v.length,range};
+ }
+ function logSignal(sym,a){
+  if(!a.ready||a.dir==="WAIT")return;
+  const key=a.dir+":"+Math.round(a.entry*100000)/100000;
+  if(lastSignals[sym]===key)return;
+  lastSignals[sym]=key;
+  history.unshift({time:new Date().toLocaleTimeString(),sym,dir:a.dir,entry:a.entry});
+  history=history.slice(0,8);
+  $("history").innerHTML=history.map(x=>`<tr><td>${x.time}</td><td>${symbols[x.sym]||x.sym}</td><td><span class="tag ${x.dir.toLowerCase()}">${x.dir}</span></td><td>${fmt(x.entry)}</td></tr>`).join("");
+ }
+ function renderPrimary(sym){
+  const a=analyse(sym);if(!a.ready){$("signalSummary").textContent=`Collecting ticks (${a.count}/35 minimum)…`;$("lastPrice").textContent=ticks[sym]?.length?fmt(ticks[sym].at(-1).quote):"—";return}
+  $("lastPrice").textContent=fmt(a.entry);$("trend").textContent=a.fast>a.slow?"Bullish":a.fast<a.slow?"Bearish":"Flat";$("rsi").textContent=a.rsi.toFixed(1);
+  $("signalSummary").innerHTML=`<span class="tag ${a.dir.toLowerCase()}">${a.dir}</span> &nbsp; ${a.reason}`;
+  $("entry").textContent=fmt(a.entry);$("sl").textContent=a.sl===null?"Wait":fmt(a.sl);$("tp").textContent=a.tp===null?"Wait":fmt(a.tp);$("rr").textContent=a.dir==="WAIT"?"—":"1 : "+a.rr;
+  logSignal(sym,a);
+ }
+ function renderMarket(sym){
+  const a=analyse(sym), price=ticks[sym]?.at(-1)?.quote;
+  let node=document.getElementById("m_"+sym);
+  if(!node){node=document.createElement("div");node.className="market";node.id="m_"+sym;$("scanlist").appendChild(node)}
+  const dir=a.ready?a.dir:"LOADING";
+  node.innerHTML=`<div class="markethead"><span class="marketname">${symbols[sym]}</span><span class="tag ${dir.toLowerCase()}">${dir}</span></div><div class="marketmeta"><span>Price: <b class="price">${fmt(price)}</b></span><span>RSI: ${a.ready?a.rsi.toFixed(1):"—"}</span><span>Ticks: ${(ticks[sym]||[]).length}</span></div>`;
+  if(sym===$("symbol").value)renderPrimary(sym);
+ }
+ $("connectBtn").addEventListener("click",connect);$("stopBtn").addEventListener("click",()=>disconnect());
+ $("symbol").addEventListener("change",()=>{if(ticks[$("symbol").value])renderPrimary($("symbol").value)});
+ $("riskReward").addEventListener("change",()=>{if(ticks[$("symbol").value])renderPrimary($("symbol").value)});
+ $("lookback").addEventListener("change",()=>{Object.keys(symbols).forEach(renderMarket)});
+ Object.keys(symbols).forEach(sym=>{const node=document.createElement("div");node.className="market";node.id="m_"+sym;node.innerHTML=`<div class="markethead"><span class="marketname">${symbols[sym]}</span><span class="tag">WAITING</span></div><div class="marketmeta">Waiting for live data…</div>`;$("scanlist").appendChild(node)});
+ window.addEventListener("beforeunload",()=>disconnect(false));
+})();
+</script>
+</body>
+</html>
